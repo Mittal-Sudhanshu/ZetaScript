@@ -1,70 +1,66 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 
 const fs = require("fs");
 const process = require("process");
-const { exec } = require('node:child_process')
+const { spawn } = require('node:child_process')
 
-// const createDirect
+const createDirectory = (loc) => {
+    fs.mkdirSync(loc, { recursive: true }, (err) => {
+        if (err) throw err;
+    });
+}
 
-fs.mkdirSync('./server', { recursive: true }, (err) => {
-    if (err) throw err;
-});
-
+createDirectory("./server");
 process.chdir("./server");
-exec('npm init', (error, stdout, stderr) => {
-    if (error) {
-        console.error(`Error executing command: ${error}`);
-        return;
-    }
-
-    // Process the command output
-    console.log(`Command output: ${stdout}`);
-
-    // Handle any errors from the command
-    if (stderr) {
-        console.error(`Command error: ${stderr}`);
-    }
-
-    // Command execution completed
-    console.log('Package.json created.');
+const npmInitProcess = spawn('npm', ['init', '-y'], {
+    stdio: 'inherit',
+    shell: true,
 });
 
-exec('npm install express mongoose bcryptjs jsonwebtoken dotenv nodemon', (error, stdout, stderr) => {
-    if (error) {
-        console.error(`Error executing command: ${error}`);
-        return;
+npmInitProcess.on('close', (code) => {
+    if (code === 0) {
+        console.log('NPM package initialized successfully.');
+    } else {
+        console.error('NPM package initialization failed with exit code:', code);
     }
-
-    // Process the command output
-    console.log(`Command output: ${stdout}`);
-
-    // Handle any errors from the command
-    if (stderr) {
-        console.error(`Command error: ${stderr}`);
-    }
-
-    // Command execution completed
-    console.log('Packages installed.');
+});
+const packagesToInstall = ['express', 'mongoose', 'bcrypt', 'jsonwebtoken', 'dotenv', 'nodemon']
+const npmPackageInstall = spawn('npm', ['install', ...packagesToInstall], {
+    stdio: 'inherit',
+    shell: true,
 });
 
+npmPackageInstall.on('close', (code) => {
+    if (code === 0) {
+        console.log('Package installation successfully.');
+    } else {
+        console.error('npm install failed with exit code:', code);
+    }
+});
+const npmGitInit = spawn('git', ['init'], {
+    stdio: 'inherit',
+    shell: true,
+})
+npmGitInit.on('close', (code) => {
+    if (code === 0) {
+        console.log('git repository initialized successfully.');
+    } else {
+        console.error('npm install failed with exit code:', code);
+    }
+});
 
-fs.writeFile('index.js', 'console.log(hello)', function (err) {
+fs.writeFileSync('.gitignore', '/node_modules\n.env', function (err) {
+    if (err) throw err;
+    console.log('Saved!');
+})
+
+const value = 'const express=require("express");\nconst app=express();\nconst port =5000||process.env.PORT;\napp.get("/",(req,res)=>{res.status("Server is live and running")});\napp.listen(port,()=>{console.log(`Server is running on port ${port}`);});'
+fs.writeFileSync('index.js', value, function (err) {
     if (err) throw err;
     console.log('Saved!');
 });
-
-fs.mkdirSync('./controllers', { recursive: true }, (err) => {
-    if (err) throw err;
-});
-fs.mkdirSync('./models', { recursive: true }, (err) => {
-    if (err) throw err;
-});
-fs.mkdirSync('./routes', { recursive: true }, (err) => {
-    if (err) throw err;
-});
-fs.mkdirSync('./middlewares', { recursive: true }, (err) => {
-    if (err) throw err;
-});
-fs.mkdirSync('./utils', { recursive: true }, (err) => {
-    if (err) throw err;
-});
+createDirectory('./contollers')
+createDirectory('./models')
+createDirectory('./routes')
+createDirectory('./middlewares')
+createDirectory('./utils')
