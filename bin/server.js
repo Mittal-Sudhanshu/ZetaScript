@@ -1,13 +1,9 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
-
-const app = express();
-const port = 3000;
-
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+const express=require("express");
+const app=express();
+require("dotenv").config();
+const PORT=process.env.PORT||8000;
+const {connectDB}=require("./utils/connectDB");
+connectDB();
+app.listen(PORT,()=>console.log(`Server is running on port ${PORT}`));
+app.use(express.json());
+app.use("/api/auth",require("./routes/authRoutes"))
